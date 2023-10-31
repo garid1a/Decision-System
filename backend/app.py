@@ -1,5 +1,5 @@
 from tkinter import messagebox
-from common_gui import CommonGUI
+from frontend.common_gui import CommonGUI
 from database import Database
 from data_analysis import analyze_data
 from recommendation import generate_recommendations
