@@ -183,8 +183,8 @@ class FarmerLoginRegistrationScreen:
 
     def register(self):
         name = self.name_entry.get()
-        location = self.location_entry.get()
-        soil_type = self.soil_type_entry.get()
+        location = self.location_combobox.get()
+        soil_type = self.soil_type_combobox.get()
         password = self.password_entry.get()
         cpassword = self.cpassword_entry.get()
         user_name = self.username_entry.get()

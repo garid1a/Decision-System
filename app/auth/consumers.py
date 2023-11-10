@@ -182,7 +182,7 @@ class ConsumerLoginRegistrationScreen:
     def register(self):
         name = self.name_entry.get()
         age = self.age_entry.get()
-        location = self.location_entry.get()
+        location = self.location_combobox.get()
         password = self.password_entry.get()
         cpassword = self.cpassword_entry.get()
         user_name = self.username_entry.get()
