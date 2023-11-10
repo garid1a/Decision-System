@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
 from app.views.dashboard import FarmerDashboardScreen
 from data.db_connection import create_db_connection
 from data.db_controller import login_farmer, insert_farmer
@@ -54,17 +55,86 @@ class FarmerLoginRegistrationScreen:
         self.name_entry = tk.Entry(registration_frame)
         self.name_entry.pack()
 
-        # Create a label and entry for location
+        # Create a label and dropdown for location
         self.location_label = tk.Label(registration_frame, text="Location:", bg=background_color)
         self.location_label.pack()
-        self.location_entry = tk.Entry(registration_frame)
-        self.location_entry.pack()
 
-        # Create a label and entry for soil_type
+        # Sample list of states for the dropdown
+         # Static Data:
+        states = [
+            "Andhra Pradesh",
+            "Arunachal Pradesh",
+            "Assam",
+            "Bihar",
+            "Chhattisgarh",
+            "Goa",
+            "Gujarat",
+            "Haryana",
+            "Himachal Pradesh",
+            "Jharkhand",
+            "Karnataka",
+            "Kerala",
+            "Madhya Pradesh",
+            "Maharashtra",
+            "Manipur",
+            "Meghalaya",
+            "Mizoram",
+            "Nagaland",
+            "Odisha",
+            "Punjab",
+            "Rajasthan",
+            "Sikkim",
+            "Tamil Nadu",
+            "Telangana",
+            "Tripura",
+            "Uttar Pradesh",
+            "Uttarakhand",
+            "West Bengal"
+        ]
+
+
+        # Create a Combobox for the location
+        self.location_var = tk.StringVar()
+        self.location_combobox = ttk.Combobox(registration_frame, textvariable=self.location_var, values=states)
+        self.location_combobox.pack()
+
+        # Create a label and dropdown for location
         self.soil_type_label = tk.Label(registration_frame, text="Soil Type:", bg=background_color)
         self.soil_type_label.pack()
-        self.soil_type_entry = tk.Entry(registration_frame)
-        self.soil_type_entry.pack()
+
+      # List of Soil Types (Max 25)
+        soil_types = [
+            "Red Sandy Loam",
+            "Mountain Soil",
+            "Alluvial",
+            "Lateritic",
+            "Hill Soil",
+            "Sandy Loam",
+            "Loamy Soil",
+            "Red and Laterite Soil",
+            "Black Soil",
+            "Red Loam",
+            "Red and Yellow Soil",
+            "Sandy Loam",
+            "Arid Soil",
+            "Hill Soil",
+            "Sandy Clay Loam",
+            "Red and Yellow Soil",
+            "Mountain Soil",
+            "Loamy Soil",
+            "Lateritic Soil",
+            "Mountain Soil",
+            "Hill Soil",
+            "Alluvial Soil",
+            "Lateritic Soil",
+            "Sandy Loam",
+            "Alluvial Soil"
+        ]
+
+        # Create a Combobox for the location
+        self.soil_type_var = tk.StringVar()
+        self.soil_type_combobox = ttk.Combobox(registration_frame, textvariable=self.soil_type_var, values=soil_types)
+        self.soil_type_combobox.pack() 
 
         # Create a label for UserName
         self.username_label = tk.Label(registration_frame, text="UserName:", bg=background_color)  # White background

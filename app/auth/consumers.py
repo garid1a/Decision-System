@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
 from app.views.product_preference import ProductPreferenceScreen
 from data.db_connection import create_db_connection
 from data.db_controller import login_consumer, insert_consumer
@@ -52,18 +53,55 @@ class ConsumerLoginRegistrationScreen:
         self.name_entry = tk.Entry(registration_frame)
         self.name_entry.pack()
 
-        # Create a label and entry for age
-        self.age_label = tk.Label(registration_frame, text="Age:", bg="white")  # White background
+                # Create a label and entry for age
+        self.age_label = tk.Label(registration_frame, text="Age:", bg="white")
         self.age_label.pack()
-        self.age_entry = tk.Entry(registration_frame)
+        self.age_entry = tk.Entry(registration_frame, validate="key", validatecommand=(root.register(self.validate_numeric), '%P'))
         self.age_entry.pack()
 
-        # Create a label and entry for location
-        self.location_label = tk.Label(registration_frame, text="Location:", bg="white")  # White background
+        # Create a label and dropdown for location
+        self.location_label = tk.Label(registration_frame, text="Location:", bg="white")
         self.location_label.pack()
-        self.location_entry = tk.Entry(registration_frame)
-        self.location_entry.pack()
 
+        # Sample list of states for the dropdown
+         # Static Data:
+        states = [
+            "Andhra Pradesh",
+            "Arunachal Pradesh",
+            "Assam",
+            "Bihar",
+            "Chhattisgarh",
+            "Goa",
+            "Gujarat",
+            "Haryana",
+            "Himachal Pradesh",
+            "Jharkhand",
+            "Karnataka",
+            "Kerala",
+            "Madhya Pradesh",
+            "Maharashtra",
+            "Manipur",
+            "Meghalaya",
+            "Mizoram",
+            "Nagaland",
+            "Odisha",
+            "Punjab",
+            "Rajasthan",
+            "Sikkim",
+            "Tamil Nadu",
+            "Telangana",
+            "Tripura",
+            "Uttar Pradesh",
+            "Uttarakhand",
+            "West Bengal"
+        ]
+
+
+        # Create a Combobox for the location
+        self.location_var = tk.StringVar()
+        self.location_combobox = ttk.Combobox(registration_frame, textvariable=self.location_var, values=states)
+        self.location_combobox.pack()
+ 
         # Create a label for UserName
         self.username_label = tk.Label(registration_frame, text="UserName:", bg="white")  # White background
         self.username_label.pack()
@@ -86,12 +124,45 @@ class ConsumerLoginRegistrationScreen:
         register_button = tk.Button(registration_frame, text="Register", command=self.register, bg="green", fg="white")  # Green button with white text
         register_button.pack(pady=10)
 
+       
+        # List of Products (Max 25)
+        products = [
+            "Rice",
+            "Wheat",
+            "Maize",
+            "Sugarcane",
+            "Cotton",
+            "Soybeans",
+            "Groundnuts",
+            "Tea",
+            "Jute",
+            "Rubber",
+            "Spices",
+            "Potatoes",
+            "Apples",
+            "Plums",
+            "Litchi",
+            "Mangoes",
+            "Cashew",
+            "Coconut",
+            "Cotton",
+            "Sugarcane",
+            "Coffee",
+            "Cardamom",
+            "Ginger",
+            "Fruits",
+            "Pulses"
+        ]
+
+        
         # Connect to Database
         self.db_connection = create_db_connection()
 
         if self.db_connection:
             print("Connected to the database")
-
+    def validate_numeric(self, value):
+            # Validate that the input is a numeric value
+            return value.isdigit()
     def login(self):
         username = self.loginusername_entry.get()
         password = self.loginpassword_entry.get()
