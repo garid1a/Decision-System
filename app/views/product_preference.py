@@ -2,86 +2,103 @@ import tkinter as tk
 from tkinter import messagebox
 from app.views.thankyou import ThankYouScreen
 from data.db_controller import get_all_products
+from data.db_controller import insert_preference
 
 class ProductPreferenceScreen:
-    def __init__(self, root, connection):
+    def __init__(self, root, connection, consumerID):
         self.root = root
         self.connection = connection
+        self.consumerID = consumerID
         self.root.title("Product Preference")
-        self.root.geometry("800x700")  # Set the initial window size
-
-        # Limit the maximum height to 400 pixels
-        self.root.maxsize(800, 700)
+        self.root.geometry("800x400")   # Set the window to full screen
 
         # Create a label for the title
-        title_label = tk.Label(root, text="Product Preference", font=("Helvetica", 16))
-        title_label.pack(pady=10)
+        title_label = tk.Label(root, text="Product Preference", font=("Helvetica", 16), bg="white")
+        title_label.grid(row=0, column=2, pady=10)
 
         # Fetch products from the database
         self.products = get_all_products(self.connection)
 
         # Create a frame for product preferences and month selection
-        preference_frame = tk.Frame(root)
-        preference_frame.pack(pady=10)
+        preference_frame = tk.Frame(root, bg="white")
+        preference_frame.grid(row=1, column=2, pady=10)
+
+        # Create a frame for month selection
+        month_frame = tk.Frame(preference_frame, bg="white")
+        month_frame.grid(row=0, column=1, padx=10)
+
+        # Create a label for month selection
+        month_label = tk.Label(month_frame, text="Select Month and Year:", bg="white")
+        month_label.pack()
+
+        # Create a dropdown for month and year
+        months_years = [("January", 2023), ("February", 2023), ("March", 2023),
+                        ("April", 2024), ("May", 2024), ("June", 2024)]
+        self.month_year_var = tk.StringVar()
+        self.month_year_var.set(months_years[0])  # Set default value
+        month_year_dropdown = tk.OptionMenu(month_frame, self.month_year_var, *months_years)
+        month_year_dropdown.pack()
 
         # Create a frame for product selection using checkboxes
-        product_frame = tk.Frame(preference_frame)
-        product_frame.pack(side="left", padx=10)
+        product_frame = tk.Frame(preference_frame, bg="white")
+        product_frame.grid(row=0, column=2, padx=10)
 
         # Create a label for product selection
-        product_label = tk.Label(product_frame, text="Select Products:")
+        product_label = tk.Label(product_frame, text="Select Products:", bg="white")
         product_label.pack()
 
         # Create variables to store the state of the checkboxes
         self.product_vars = []
-        for product in self.products:
+        for i, product in enumerate(self.products):
             var = tk.BooleanVar()
             self.product_vars.append(var)
-            print(product)
-            checkbox = tk.Checkbutton(product_frame, text=product['ProductName'], variable=var)
+            checkbox = tk.Checkbutton(product_frame, text=product['ProductName'], variable=var, bg="white")
             checkbox.pack(anchor="w")
 
-        # Create a frame for month selection
-        month_frame = tk.Frame(preference_frame)
-        month_frame.pack(side="left", padx=10)
+        # Create a frame for the "Add Preferences" button
+        button_frame = tk.Frame(preference_frame, bg="white")
+        button_frame.grid(row=0, column=3, padx=10)
 
-        # Create a label for month selection
-        month_label = tk.Label(month_frame, text="Select Months:")
-        month_label.pack()
-
-        # Create a list of month options
-        months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
-        # Create variables to store the state of the month checkboxes
-        self.month_vars = []
-        for month in months:
-            var = tk.BooleanVar()
-            self.month_vars.append(var)
-            checkbox = tk.Checkbutton(month_frame, text=month, variable=var)
-            checkbox.pack(anchor="w")
-
-        # Create a submit button
-        submit_button = tk.Button(root, text="Submit Preferences", command=self.submit_preferences)
+        # Set the button color to green
+        submit_button = tk.Button(button_frame, text="Add Preferences", command=self.add_preferences, bg="green", fg="white")
         submit_button.pack(pady=10)
 
-    def submit_preferences(self):
-        selected_products = [product for product, var in zip(self.products, self.product_vars) if var.get()]
-        selected_months = [month for month, var in zip(
-            ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-            self.month_vars) if var.get()]
+        # Create a listbox to display selected preferences at the bottom
+        self.preference_listbox = tk.Listbox(root, selectbackground="green", selectforeground="white", bg="white", width=50)
+        self.preference_listbox.grid(row=1, column=5, pady=10)
+
+         # Create a frame for the "Add Preferences" button
+        submit_button_frame = tk.Frame(root, bg="white")
+        submit_button_frame.grid(row=2, column=5, padx=10)
+
+        # Set the button color to green
+        final_button = tk.Button(submit_button_frame, text="Finish", command=self.submit_preferences, bg="green", fg="white")
+        final_button.pack(pady=10)
+
+    def add_preferences(self):
+        selected_products = [product['ProductName'] for product, var in zip(self.products, self.product_vars) if var.get()]
+        selected_month_year = self.month_year_var.get()
 
         if not selected_products:
             messagebox.showerror("Error", "Please select at least one product.")
             return
+        try:
+            self.preferences = insert_preference(self.connection, selected_month_year, self.consumerID, self.products, selected_products)
+        except:
+            messagebox.showerror("Error", "Error Occured")
 
-        if not selected_months:
-            messagebox.showerror("Error", "Please select at least one month.")
-            return
+        # Display selected preferences in the listbox
+        preferences_str = f"{selected_month_year}: {', '.join(selected_products)}"
+        self.preference_listbox.insert(tk.END, preferences_str)
 
-        # Process and save consumer's preferences in the database
-        # You can add your logic to store the preferences
+        # Display a message box for successful addition of preferences
+        messagebox.showinfo("Success", f"Preferences added for {selected_month_year}.")
 
+        # You can add more logic to update the display or reset selections if needed
+
+    def submit_preferences(self):
         self.thankyou()
+      
 
     def thankyou(self):
         self.root.withdraw()  # Hide the login/registration screen

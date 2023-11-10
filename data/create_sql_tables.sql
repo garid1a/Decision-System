@@ -41,10 +41,17 @@ CREATE TABLE Product (
 CREATE TABLE Preference (
     PreferenceID INT AUTO_INCREMENT PRIMARY KEY,
     ConsumerID INT,
-    ProductID INT,
     Month VARCHAR(255),
-    FOREIGN KEY (ConsumerID) REFERENCES Consumer(ConsumerID),
-    FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+    FOREIGN KEY (ConsumerID) REFERENCES Consumer(ConsumerID)
+);
+
+-- Create the ProductPreference table (junction table)
+CREATE TABLE ProductPreference (
+    ProductID INT,
+    PreferenceID INT,
+    PRIMARY KEY (ProductID, PreferenceID),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+    FOREIGN KEY (PreferenceID) REFERENCES Preference(PreferenceID)
 );
 
 -- Create the Farmer table

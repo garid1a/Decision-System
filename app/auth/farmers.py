@@ -50,7 +50,7 @@ class FarmerLoginRegistrationScreen:
         title_label.pack(pady=10)
 
         # Create a label and entry for name
-        self.name_label = tk.Label(registration_frame, text="Name:", bg=background_color)
+        self.name_label = tk.Label(registration_frame, text="Full Name:", bg=background_color)
         self.name_label.pack()
         self.name_entry = tk.Entry(registration_frame)
         self.name_entry.pack()

@@ -48,7 +48,7 @@ class ConsumerLoginRegistrationScreen:
         title_label.pack(pady=10)
 
         # Create a label and entry for name
-        self.name_label = tk.Label(registration_frame, text="Name:", bg="white")  # White background
+        self.name_label = tk.Label(registration_frame, text="Full Name:", bg="white")  # White background
         self.name_label.pack()
         self.name_entry = tk.Entry(registration_frame)
         self.name_entry.pack()
@@ -125,35 +125,6 @@ class ConsumerLoginRegistrationScreen:
         register_button.pack(pady=10)
 
        
-        # List of Products (Max 25)
-        products = [
-            "Rice",
-            "Wheat",
-            "Maize",
-            "Sugarcane",
-            "Cotton",
-            "Soybeans",
-            "Groundnuts",
-            "Tea",
-            "Jute",
-            "Rubber",
-            "Spices",
-            "Potatoes",
-            "Apples",
-            "Plums",
-            "Litchi",
-            "Mangoes",
-            "Cashew",
-            "Coconut",
-            "Cotton",
-            "Sugarcane",
-            "Coffee",
-            "Cardamom",
-            "Ginger",
-            "Fruits",
-            "Pulses"
-        ]
-
         
         # Connect to Database
         self.db_connection = create_db_connection()
@@ -174,6 +145,7 @@ class ConsumerLoginRegistrationScreen:
         consumer = login_consumer(self.db_connection, username, password)
 
         if consumer:
+            self.consumer_id = consumer['ConsumerID']
             print(f"Logged in as {consumer['Name']}")
             self.open_product_preference_screen()
         else:
@@ -248,7 +220,7 @@ class ConsumerLoginRegistrationScreen:
     def open_product_preference_screen(self):
         self.root.withdraw()  # Hide the login/registration screen
         product_preference_window = tk.Toplevel()  # Create a new window
-        product_preference_app = ProductPreferenceScreen(product_preference_window, self.db_connection)
+        product_preference_app = ProductPreferenceScreen(product_preference_window, self.db_connection, self.consumer_id)
 
     def close(self):
         if self.db_connection:

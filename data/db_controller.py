@@ -85,17 +85,37 @@ def login_farmer(connection, username, password):
         return None
 
 # Insert a new Preference into the database
-def insert_preference(connection, preference):
+def insert_preference(connection, selected_month_year, consumerID, products, selected_products):
     cursor = connection.cursor()
-    insert_query = "INSERT INTO Preference (ConsumerID, ProductID, Month) VALUES (%s, %s, %s)"
-    preference_data = (preference.consumer_id, preference.product_id, preference.month)
-    
-    try:
-        cursor.execute(insert_query, preference_data)
-        connection.commit()
-        print("Preference inserted successfully")
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
+    # Insert data into the Preference table
+    insert_preference_query = "INSERT INTO Preference (ConsumerID, Month) VALUES (%s, %s)"
+    cursor.execute(insert_preference_query, (consumerID, selected_month_year))  # Replace 1 with the actual ConsumerID
+
+    # Get the PreferenceID of the inserted preference
+    preference_id = cursor.lastrowid
+    print(preference_id,'Preference ID')
+
+    # Insert data into the ProductPreference table for each selected product
+    insert_product_preference_query = "INSERT INTO ProductPreference (ProductID, PreferenceID) VALUES (%s, %s)"
+    for product in products:
+        if product['ProductName'] in selected_products:
+            # Replace 'get_product_id' with a function that retrieves the ProductID based on the product name
+            product_id = get_product_id(cursor, product['ProductName'])
+            print(product_id, 'PRODUCT ID')
+            cursor.execute(insert_product_preference_query, (product_id, preference_id))
+
+    # Commit the changes to the database
+    connection.commit()
+
+def get_product_id(cursor, product_name):
+    query = "SELECT ProductID FROM Product WHERE ProductName = %s"
+    cursor.execute(query, (product_name,))
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    else:
+        # Handle the case where the product is not found (return None or raise an exception)
+        return None
 
 # Insert a new Product into the database
 def insert_product(connection, product):
