@@ -15,8 +15,8 @@ def insert_consumer(connection, consumer):
     try:
         cursor = connection.cursor(dictionary=True)
         insert_query = """
-        INSERT INTO Consumer (Name, Age, Location)
-        VALUES (%(Name)s, %(Age)s, %(Location)s)
+        INSERT INTO Consumer (Name, Age, Location, UserName, Password)
+        VALUES (%(Name)s, %(Age)s, %(Location)s, %(UserName)s, %(Password)s)
         """
         cursor.execute(insert_query, consumer)
         connection.commit()
@@ -52,8 +52,8 @@ def insert_farmer(connection, farmer):
     try:
         cursor = connection.cursor(dictionary=True)
         insert_query = """
-        INSERT INTO Farmer (Name, Location, SoilType)
-        VALUES (%(Name)s, %(Location)s, %(SoilType)s)
+        INSERT INTO Farmer (Name, Location, SoilType, UserName, Password)
+        VALUES (%(Name)s, %(Location)s, %(SoilType)s,  %(UserName)s,  %(Password)s)
         """
         cursor.execute(insert_query, farmer)
         connection.commit()

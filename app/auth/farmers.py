@@ -3,6 +3,7 @@ from tkinter import messagebox
 from app.views.dashboard import FarmerDashboardScreen
 from data.db_connection import create_db_connection
 from data.db_controller import login_farmer, insert_farmer
+import re
 
 class FarmerLoginRegistrationScreen:
     def __init__(self, root):
@@ -28,16 +29,16 @@ class FarmerLoginRegistrationScreen:
         title_label.pack(pady=10)
 
         # Create a label and entry for username
-        self.username_label = tk.Label(login_frame, text="Username:", bg=background_color)
-        self.username_label.pack()
-        self.username_entry = tk.Entry(login_frame)
-        self.username_entry.pack()
+        self.loginusername_label = tk.Label(login_frame, text="Username:", bg=background_color)
+        self.loginusername_label.pack()
+        self.loginusername_entry = tk.Entry(login_frame)
+        self.loginusername_entry.pack()
 
         # Create a label and entry for password
-        self.password_label = tk.Label(login_frame, text="Password:", bg=background_color)
-        self.password_label.pack()
-        self.password_entry = tk.Entry(login_frame, show='*')
-        self.password_entry.pack()
+        self.loginpassword_label = tk.Label(login_frame, text="Password:", bg=background_color)
+        self.loginpassword_label.pack()
+        self.loginpassword_entry = tk.Entry(login_frame, show='*')
+        self.loginpassword_entry.pack()
 
         # Create a login button
         login_button = tk.Button(login_frame, text="Login", command=self.login)
@@ -65,6 +66,25 @@ class FarmerLoginRegistrationScreen:
         self.soil_type_entry = tk.Entry(registration_frame)
         self.soil_type_entry.pack()
 
+        # Create a label for UserName
+        self.username_label = tk.Label(registration_frame, text="UserName:", bg=background_color)  # White background
+        self.username_label.pack()
+        self.username_entry = tk.Entry(registration_frame)
+        self.username_entry.pack()
+
+        # Create a label for Password
+        self.password_label = tk.Label(registration_frame, text="Password:", bg=background_color)  # White background
+        self.password_label.pack()
+        self.password_entry = tk.Entry(registration_frame)
+        self.password_entry.pack()
+
+        # Create a label for Password
+        self.cpassword_label = tk.Label(registration_frame, text="Confirm Password:", bg=background_color)  # White background
+        self.cpassword_label.pack()
+        self.cpassword_entry = tk.Entry(registration_frame)
+        self.cpassword_entry.pack()
+
+
         # Create a register button
         register_button = tk.Button(registration_frame, text="Register", command=self.register)
         register_button.pack(pady=10)
@@ -76,8 +96,8 @@ class FarmerLoginRegistrationScreen:
             print("Connected to the database")
 
     def login(self):
-        username = self.username_entry.get()
-        password = self.password_entry.get()
+        username = self.loginusername_entry.get()
+        password = self.loginpassword_entry.get()
 
         if not username or not password:
             messagebox.showerror("Error", "Please fill in both fields.")
@@ -95,14 +115,58 @@ class FarmerLoginRegistrationScreen:
         name = self.name_entry.get()
         location = self.location_entry.get()
         soil_type = self.soil_type_entry.get()
-        if not name or not location or not soil_type:
+        password = self.password_entry.get()
+        cpassword = self.cpassword_entry.get()
+        user_name = self.username_entry.get()
+
+        if not name or not location or not soil_type or not password or not cpassword or not user_name:
             messagebox.showerror("Error", "Please fill in all fields.")
             return
+        
+        #UserName Validation
+        if not re.match("^[a-zA-Z0-9]*$", user_name):
+            messagebox.showerror("Error", "Username can only contain letters and numbers.")
+            return
+        
+        # Validate Password 
+        error_message = []
+
+        if len(password) < 12:
+            error_message.append("Password must be at least 12 characters long.")
+        
+        if not any(c.isupper() for c in password):
+            error_message.append("Password must contain at least one uppercase letter.")
+        
+        if not any(c.islower() for c in password):
+            error_message.append("Password must contain at least one lowercase letter.")
+        
+        if not any(c.isdigit() for c in password):
+            error_message.append("Password must contain at least one numeric digit.")
+        
+        if not any(c in r'!@#$%' for c in password):
+            error_message.append("Password must contain at least one special character (!, @, #, $, %).")
+        
+        if any(common_word in password.lower() for common_word in ['password', '12345', 'qwerty']):
+            error_message.append("Avoid using easily guessable information, such as common words or patterns.")
+        
+        if error_message:
+            messagebox.showerror("Error", "\n".join(error_message))
+            return
+
+        # Validate Password and Confirm Password match
+        if self.password_entry.get() != self.cpassword_entry.get():
+            messagebox.showerror("Error", "Passwords do not match.")
+            return
+ 
+        
         farmer_data = {
             "Name": name,
             "Location": location,
-            "SoilType": soil_type
+            "SoilType": soil_type,
+            "UserName" : user_name,
+            "Password": password
         }
+
         farmer_id = insert_farmer(self.db_connection, farmer_data)
         if farmer_id:
             print('SIGNUP')
