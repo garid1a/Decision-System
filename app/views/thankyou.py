@@ -5,7 +5,7 @@ class ThankYouScreen:
         self.root = root
         self.root.title("Thank You")
         self.root.geometry("800x400") 
-        
+        self.root.configure(bg="white") 
         # Create a label for the thank-you message
         thank_you_label = tk.Label(root, text="Thank you for submitting your product preferences!", font=("Helvetica", 16))
         thank_you_label.pack(pady=10)

@@ -1,17 +1,17 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
-from app.views.product_preference import ProductPreferenceScreen
 from data.db_connection import create_db_connection
 from data.db_controller import login_consumer, insert_consumer
-import re
+import re 
+
 
 class ConsumerLoginRegistrationScreen:
-    def __init__(self, root):
+    def __init__(self, root, landing_page_callback): 
         self.root = root
         self.root.title("Consumer Login/Registration")
         self.root.geometry("800x400")  # Set the window size
-
+        self.landing_page_callback = landing_page_callback 
         # Set background color
         self.root.configure(bg="light gray")  # Light gray background
 
@@ -42,6 +42,10 @@ class ConsumerLoginRegistrationScreen:
         # Create a login button
         login_button = tk.Button(login_frame, text="Login", command=self.login, bg="green", fg="white")  # Blue button with white text
         login_button.pack(pady=10)
+
+        back_button = tk.Button(login_frame, text="Back", command=self.back, bg="grey", fg="white")  # Green button with white text
+        back_button.pack(pady=5)
+
 
         # Create a label for the title
         title_label = tk.Label(registration_frame, text="Consumer Registration", font=("Helvetica", 16), bg="white")  # White background
@@ -124,8 +128,9 @@ class ConsumerLoginRegistrationScreen:
         register_button = tk.Button(registration_frame, text="Register", command=self.register, bg="green", fg="white")  # Green button with white text
         register_button.pack(pady=10)
 
-       
-        
+        back_button = tk.Button(registration_frame, text="Back", command=self.back, bg="grey", fg="white")  # Green button with white text
+        back_button.pack(pady=5)
+ 
         # Connect to Database
         self.db_connection = create_db_connection()
 
@@ -134,6 +139,10 @@ class ConsumerLoginRegistrationScreen:
     def validate_numeric(self, value):
             # Validate that the input is a numeric value
             return value.isdigit()
+    def back(self):
+        self.root.withdraw()
+        self.landing_page_callback()
+
     def login(self):
         username = self.loginusername_entry.get()
         password = self.loginpassword_entry.get()
@@ -219,6 +228,7 @@ class ConsumerLoginRegistrationScreen:
 
     def open_product_preference_screen(self):
         self.root.withdraw()  # Hide the login/registration screen
+        from app.views.product_preference import ProductPreferenceScreen 
         product_preference_window = tk.Toplevel()  # Create a new window
         product_preference_app = ProductPreferenceScreen(product_preference_window, self.db_connection, self.consumer_id)
 
@@ -228,5 +238,5 @@ class ConsumerLoginRegistrationScreen:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = ConsumerLoginRegistrationScreen(root)
+    app = ConsumerLoginRegistrationScreen(root) 
     root.mainloop()

@@ -11,7 +11,7 @@ class ProductPreferenceScreen:
         self.consumerID = consumerID
         self.root.title("Product Preference")
         self.root.geometry("800x400")   # Set the window to full screen
-
+        self.root.configure(bg="white") 
         # Create a label for the title
         title_label = tk.Label(root, text="Product Preference", font=("Helvetica", 16), bg="white")
         title_label.grid(row=0, column=2, pady=10)

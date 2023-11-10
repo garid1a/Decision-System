@@ -7,10 +7,11 @@ from data.db_controller import login_farmer, insert_farmer
 import re
 
 class FarmerLoginRegistrationScreen:
-    def __init__(self, root):
+    def __init__(self, root, landing_page_callback):
         self.root = root
         self.root.title("Farmer Login/Registration")
         self.root.geometry("800x400")  # Set the window size
+        self.landing_page_callback = landing_page_callback 
 
         # Create a frame for login
         login_frame = tk.Frame(root, bd=2, relief="ridge")  # Add a border
@@ -21,7 +22,7 @@ class FarmerLoginRegistrationScreen:
         registration_frame.pack(side="left", fill="both", expand=True)
 
         # Set Background Color
-        background_color = "light gray"
+        background_color = "white"
         login_frame.configure(bg=background_color)
         registration_frame.configure(bg=background_color)
 
@@ -42,8 +43,11 @@ class FarmerLoginRegistrationScreen:
         self.loginpassword_entry.pack()
 
         # Create a login button
-        login_button = tk.Button(login_frame, text="Login", command=self.login)
+        login_button = tk.Button(login_frame, text="Login", command=self.login, bg="green", fg="white")
         login_button.pack(pady=10)
+
+        back_button = tk.Button(login_frame, text="Back", command=self.back, bg="grey", fg="white")  # Green button with white text
+        back_button.pack(pady=5)
 
         # Create a label for the title
         title_label = tk.Label(registration_frame, text="Farmer Registration", font=("Helvetica", 16), bg=background_color)
@@ -156,14 +160,21 @@ class FarmerLoginRegistrationScreen:
 
 
         # Create a register button
-        register_button = tk.Button(registration_frame, text="Register", command=self.register)
+        register_button = tk.Button(registration_frame, text="Register", command=self.register,  bg="green", fg="white")
         register_button.pack(pady=10)
+
+        back_button = tk.Button(registration_frame, text="Back", command=self.back, bg="grey", fg="white")  # Green button with white text
+        back_button.pack(pady=5)
 
         # Connect to Database
         self.db_connection = create_db_connection()
 
         if self.db_connection:
             print("Connected to the database")
+
+    def back(self):
+        self.root.withdraw()
+        self.landing_page_callback()
 
     def login(self):
         username = self.loginusername_entry.get()
