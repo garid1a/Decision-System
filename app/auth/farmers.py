@@ -5,6 +5,7 @@ from app.views.dashboard import FarmerDashboardScreen
 from data.db_connection import create_db_connection
 from data.db_controller import login_farmer, insert_farmer
 import re
+from app.views.layout import Layout 
 
 class FarmerLoginRegistrationScreen:
     def __init__(self, root, landing_page_callback):
@@ -12,6 +13,9 @@ class FarmerLoginRegistrationScreen:
         self.root.title("Farmer Login/Registration")
         self.root.geometry("800x400")  # Set the window size
         self.landing_page_callback = landing_page_callback 
+
+        # Reuse the common header and footer
+        Layout(root) 
 
         # Create a frame for login
         login_frame = tk.Frame(root, bd=2, relief="ridge")  # Add a border

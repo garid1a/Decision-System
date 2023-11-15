@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
+from app.views.layout import Layout 
 
 class LandingPage:
     def __init__(self, root):
@@ -15,6 +16,8 @@ class LandingPage:
         # background_label = tk.Label(root, image=photo)
         # background_label.place(relwidth=1, relheight=1)
 
+        # Reuse the common header and footer
+        Layout(root) 
         # Create a label for the title
         title_label = tk.Label(root, text="Consumer-Farmer Decision Support System", font=("Helvetica", 24, "bold"), bg="white")
         title_label.pack(pady=20)

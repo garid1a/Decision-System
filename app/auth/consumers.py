@@ -4,6 +4,7 @@ from tkinter import ttk
 from data.db_connection import create_db_connection
 from data.db_controller import login_consumer, insert_consumer
 import re 
+from app.views.layout import Layout 
 
 
 class ConsumerLoginRegistrationScreen:
@@ -15,6 +16,9 @@ class ConsumerLoginRegistrationScreen:
         # Set background color
         self.root.configure(bg="light gray")  # Light gray background
 
+        # Reuse the common header and footer
+        Layout(root) 
+        
         # Create a frame for login
         login_frame = tk.Frame(root, bd=2, relief="ridge", bg="white")  # Light gray border, white background
         login_frame.pack(side="left", fill="both", expand=True)
