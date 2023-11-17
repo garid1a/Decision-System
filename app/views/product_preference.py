@@ -1,19 +1,25 @@
 import tkinter as tk
+
 from tkinter import messagebox
 from app.views.thankyou import ThankYouScreen
 from data.db_controller import get_all_products
 from data.db_controller import insert_preference
-
+from tkinter import font 
 class ProductPreferenceScreen:
     def __init__(self, root, connection, consumerID):
+        
         self.root = root
         self.connection = connection
         self.consumerID = consumerID
         self.root.title("Product Preference")
-        self.root.geometry("800x400")   # Set the window to full screen
-        self.root.configure(bg="white") 
-        # Create a label for the title
-        title_label = tk.Label(root, text="Product Preference", font=("Helvetica", 16), bg="white")
+        self.root.geometry("1200x600")  # Set the window to full screen
+ 
+
+        default_font = font.nametofont("TkDefaultFont")
+        default_font.configure(family="Roboto")
+
+        self.root.configure(bg="white")
+        title_label = tk.Label(root, text="Product Preference", font=(default_font, 16), bg="white")
         title_label.grid(row=0, column=2, pady=10)
 
         # Fetch products from the database
@@ -21,19 +27,20 @@ class ProductPreferenceScreen:
 
         # Create a frame for product preferences and month selection
         preference_frame = tk.Frame(root, bg="white")
-        preference_frame.grid(row=1, column=2, pady=10)
+        preference_frame.grid(row=1, column=1, pady=10)
 
         # Create a frame for month selection
         month_frame = tk.Frame(preference_frame, bg="white")
-        month_frame.grid(row=0, column=1, padx=10)
+        month_frame.grid(row=0, column=2, padx=10)
 
         # Create a label for month selection
         month_label = tk.Label(month_frame, text="Select Month and Year:", bg="white")
         month_label.pack()
 
         # Create a dropdown for month and year
-        months_years = [("January", 2023), ("February", 2023), ("March", 2023),
-                        ("April", 2024), ("May", 2024), ("June", 2024)]
+        months_years = [("January", 2024), ("February", 2024), ("March", 2024),
+                        ("April", 2024), ("May", 2024), ("June", 2024), ("July", 2024), 
+                        ("August", 2024), ("September", 2024), ("November", 2024), ("December", 2024)]
         self.month_year_var = tk.StringVar()
         self.month_year_var.set(months_years[0])  # Set default value
         month_year_dropdown = tk.OptionMenu(month_frame, self.month_year_var, *months_years)
@@ -41,7 +48,7 @@ class ProductPreferenceScreen:
 
         # Create a frame for product selection using checkboxes
         product_frame = tk.Frame(preference_frame, bg="white")
-        product_frame.grid(row=0, column=2, padx=10)
+        product_frame.grid(row=0, column=1, padx=10)
 
         # Create a label for product selection
         product_label = tk.Label(product_frame, text="Select Products:", bg="white")
@@ -60,20 +67,25 @@ class ProductPreferenceScreen:
         button_frame.grid(row=0, column=3, padx=10)
 
         # Set the button color to green
-        submit_button = tk.Button(button_frame, text="Add Preferences", command=self.add_preferences, bg="green", fg="white")
+        submit_button = tk.Button(button_frame, text="Add Preferences", command=self.add_preferences, bg="#12DB81", fg="white",
+                                  bd=0, relief=tk.GROOVE, padx=20, pady=10, borderwidth=2, highlightthickness=0,
+                                  cursor="hand2", font=(default_font, 12))
         submit_button.pack(pady=10)
 
         # Create a listbox to display selected preferences at the bottom
-        self.preference_listbox = tk.Listbox(root, selectbackground="green", selectforeground="white", bg="white", width=50)
+        self.preference_listbox = tk.Listbox(root, selectbackground="#12DB81", selectforeground="white", bg="white", width=60)
         self.preference_listbox.grid(row=1, column=5, pady=10)
 
-         # Create a frame for the "Add Preferences" button
+        # Create a frame for the "Add Preferences" button
         submit_button_frame = tk.Frame(root, bg="white")
         submit_button_frame.grid(row=2, column=5, padx=10)
 
         # Set the button color to green
-        final_button = tk.Button(submit_button_frame, text="Finish", command=self.submit_preferences, bg="green", fg="white")
-        final_button.pack(pady=10)
+        final_button = tk.Button(submit_button_frame, text="Finish", command=self.submit_preferences, bg="#12DB81", fg="white",
+                                 bd=0, relief=tk.GROOVE, padx=20, pady=10, borderwidth=2, highlightthickness=0,
+                                 cursor="hand2", font=(default_font, 12))
+        final_button.pack(pady=10) 
+        
 
     def add_preferences(self):
         selected_products = [product['ProductName'] for product, var in zip(self.products, self.product_vars) if var.get()]

@@ -1,28 +1,32 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+from app.views.main_layout import MainLayout
 from app.views.dashboard import FarmerDashboardScreen
 from data.db_connection import create_db_connection
 from data.db_controller import login_farmer, insert_farmer
 import re
-from app.views.layout import Layout 
+from tkinter import font
 
 class FarmerLoginRegistrationScreen:
     def __init__(self, root, landing_page_callback):
         self.root = root
         self.root.title("Farmer Login/Registration")
-        self.root.geometry("800x400")  # Set the window size
+        self.root.geometry("1200x600")  # Set the window size
         self.landing_page_callback = landing_page_callback 
 
+        default_font = font.nametofont("TkDefaultFont")
+        default_font.configure(family="Roboto")
+
         # Reuse the common header and footer
-        Layout(root) 
+        MainLayout(root) 
 
         # Create a frame for login
-        login_frame = tk.Frame(root, bd=2, relief="ridge")  # Add a border
+        login_frame = tk.Frame(root, padx=20, pady=20)  # Add a border
         login_frame.pack(side="left", fill="both", expand=True)
 
         # Create a frame for registration
-        registration_frame = tk.Frame(root, bd=2, relief="ridge")  # Add a border
+        registration_frame = tk.Frame(root, padx=20, pady=20)  # Add a border
         registration_frame.pack(side="left", fill="both", expand=True)
 
         # Set Background Color
@@ -31,144 +35,109 @@ class FarmerLoginRegistrationScreen:
         registration_frame.configure(bg=background_color)
 
         # Create a label for the title
-        title_label = tk.Label(login_frame, text="Farmer Login", font=("Helvetica", 16), bg=background_color)
+        title_label = tk.Label(login_frame, text="Farmer Login", font=(default_font, 16), bg=background_color)
         title_label.pack(pady=10)
 
-        # Create a label and entry for username
-        self.loginusername_label = tk.Label(login_frame, text="Username:", bg=background_color)
+        self.loginusername_label = tk.Label(login_frame, text="Username:", bg="white")
         self.loginusername_label.pack()
-        self.loginusername_entry = tk.Entry(login_frame)
-        self.loginusername_entry.pack()
+        self.loginusername_entry = tk.Entry(login_frame, width=30, bd=3, relief=tk.GROOVE, font=(default_font, 12))
+        self.loginusername_entry.pack(pady=10)
 
-        # Create a label and entry for password
-        self.loginpassword_label = tk.Label(login_frame, text="Password:", bg=background_color)
+        self.loginpassword_label = tk.Label(login_frame, text="Password:", bg="white")
         self.loginpassword_label.pack()
-        self.loginpassword_entry = tk.Entry(login_frame, show='*')
-        self.loginpassword_entry.pack()
-
+        self.loginpassword_entry = tk.Entry(login_frame, show='*', width=30, bd=3, relief=tk.GROOVE, font=(default_font, 12))
+        self.loginpassword_entry.pack(pady=10)
+ 
         # Create a login button
-        login_button = tk.Button(login_frame, text="Login", command=self.login, bg="green", fg="white")
-        login_button.pack(pady=10)
+        login_button = tk.Button(login_frame, text="Login", command=self.login, bg="#12DB81", fg="white", bd=0,
+                                relief=tk.GROOVE, padx=20, pady=10, borderwidth=2, highlightthickness=0, cursor="hand2",
+                                font=(default_font, 12))
+        login_button.pack(side=tk.LEFT, padx=(180, 5), pady=10)
 
-        back_button = tk.Button(login_frame, text="Back", command=self.back, bg="grey", fg="white")  # Green button with white text
-        back_button.pack(pady=5)
+        # Create a back button
+        back_button = tk.Button(login_frame, text="Back", command=self.back, bg="#63E8A6", fg="white", bd=0,
+                                relief=tk.GROOVE, padx=20, pady=10, borderwidth=2, highlightthickness=0, cursor="hand2",
+                                font=(default_font, 12))
+        back_button.pack(side=tk.LEFT, padx=(5, 10), pady=10)
 
-        # Create a label for the title
-        title_label = tk.Label(registration_frame, text="Farmer Registration", font=("Helvetica", 16), bg=background_color)
+
+       # Create a label for the title
+        title_label = tk.Label(registration_frame, text="Farmer Registration", font=("Helvetica", 16), bg="white")
         title_label.pack(pady=10)
 
         # Create a label and entry for name
-        self.name_label = tk.Label(registration_frame, text="Full Name:", bg=background_color)
+        self.name_label = tk.Label(registration_frame, text="Full Name:", bg="white")
         self.name_label.pack()
-        self.name_entry = tk.Entry(registration_frame)
-        self.name_entry.pack()
+        self.name_entry = tk.Entry(registration_frame, width=30, bd=3, relief=tk.GROOVE, font=(default_font, 12))
+        self.name_entry.pack(pady=5)
 
         # Create a label and dropdown for location
-        self.location_label = tk.Label(registration_frame, text="Location:", bg=background_color)
+        self.location_label = tk.Label(registration_frame, text="Location:", bg="white")
         self.location_label.pack()
 
         # Sample list of states for the dropdown
-         # Static Data:
         states = [
-            "Andhra Pradesh",
-            "Arunachal Pradesh",
-            "Assam",
-            "Bihar",
-            "Chhattisgarh",
-            "Goa",
-            "Gujarat",
-            "Haryana",
-            "Himachal Pradesh",
-            "Jharkhand",
-            "Karnataka",
-            "Kerala",
-            "Madhya Pradesh",
-            "Maharashtra",
-            "Manipur",
-            "Meghalaya",
-            "Mizoram",
-            "Nagaland",
-            "Odisha",
-            "Punjab",
-            "Rajasthan",
-            "Sikkim",
-            "Tamil Nadu",
-            "Telangana",
-            "Tripura",
-            "Uttar Pradesh",
-            "Uttarakhand",
-            "West Bengal"
+            "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana",
+            "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+            "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana",
+            "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
         ]
-
 
         # Create a Combobox for the location
         self.location_var = tk.StringVar()
-        self.location_combobox = ttk.Combobox(registration_frame, textvariable=self.location_var, values=states)
-        self.location_combobox.pack()
+        self.location_combobox = ttk.Combobox(registration_frame, textvariable=self.location_var, values=states,
+                                              width=28, font=(default_font, 12))
+        self.location_combobox.pack(pady=5)
 
         # Create a label and dropdown for location
-        self.soil_type_label = tk.Label(registration_frame, text="Soil Type:", bg=background_color)
+        self.soil_type_label = tk.Label(registration_frame, text="Soil Type:", bg="white")
         self.soil_type_label.pack()
 
-      # List of Soil Types (Max 25)
+        # List of Soil Types (Max 25)
         soil_types = [
-            "Red Sandy Loam",
-            "Mountain Soil",
-            "Alluvial",
-            "Lateritic",
-            "Hill Soil",
-            "Sandy Loam",
-            "Loamy Soil",
-            "Red and Laterite Soil",
-            "Black Soil",
-            "Red Loam",
-            "Red and Yellow Soil",
-            "Sandy Loam",
-            "Arid Soil",
-            "Hill Soil",
-            "Sandy Clay Loam",
-            "Red and Yellow Soil",
-            "Mountain Soil",
-            "Loamy Soil",
-            "Lateritic Soil",
-            "Mountain Soil",
-            "Hill Soil",
-            "Alluvial Soil",
-            "Lateritic Soil",
-            "Sandy Loam",
-            "Alluvial Soil"
+            "Red Sandy Loam", "Mountain Soil", "Alluvial", "Lateritic", "Hill Soil", "Sandy Loam", "Loamy Soil",
+            "Red and Laterite Soil", "Black Soil", "Red Loam", "Red and Yellow Soil", "Sandy Loam", "Arid Soil",
+            "Hill Soil", "Sandy Clay Loam", "Red and Yellow Soil", "Mountain Soil", "Loamy Soil", "Lateritic Soil",
+            "Mountain Soil", "Hill Soil", "Alluvial Soil", "Lateritic Soil", "Sandy Loam", "Alluvial Soil"
         ]
 
         # Create a Combobox for the location
         self.soil_type_var = tk.StringVar()
-        self.soil_type_combobox = ttk.Combobox(registration_frame, textvariable=self.soil_type_var, values=soil_types)
-        self.soil_type_combobox.pack() 
+        self.soil_type_combobox = ttk.Combobox(registration_frame, textvariable=self.soil_type_var, values=soil_types,
+                                               width=28, font=(default_font, 12))
+        self.soil_type_combobox.pack(pady=5)
 
         # Create a label for UserName
-        self.username_label = tk.Label(registration_frame, text="UserName:", bg=background_color)  # White background
+        self.username_label = tk.Label(registration_frame, text="UserName:", bg="white")
         self.username_label.pack()
-        self.username_entry = tk.Entry(registration_frame)
-        self.username_entry.pack()
+        self.username_entry = tk.Entry(registration_frame, width=30, bd=3, relief=tk.GROOVE, font=(default_font, 12))
+        self.username_entry.pack(pady=5)
 
         # Create a label for Password
-        self.password_label = tk.Label(registration_frame, text="Password:", bg=background_color)  # White background
+        self.password_label = tk.Label(registration_frame, text="Password:", bg="white")
         self.password_label.pack()
-        self.password_entry = tk.Entry(registration_frame)
-        self.password_entry.pack()
+        self.password_entry = tk.Entry(registration_frame, width=30, bd=3, relief=tk.GROOVE, font=(default_font, 12),
+                                       show='*')
+        self.password_entry.pack(pady=5)
 
-        # Create a label for Password
-        self.cpassword_label = tk.Label(registration_frame, text="Confirm Password:", bg=background_color)  # White background
+        # Create a label for Confirm Password
+        self.cpassword_label = tk.Label(registration_frame, text="Confirm Password:", bg="white")
         self.cpassword_label.pack()
-        self.cpassword_entry = tk.Entry(registration_frame)
-        self.cpassword_entry.pack()
+        self.cpassword_entry = tk.Entry(registration_frame, width=30, bd=3, relief=tk.GROOVE, font=(default_font, 12),
+                                        show='*')
+        self.cpassword_entry.pack(pady=5)
+ 
+        # Create a login button
+        register_button = tk.Button(registration_frame, text="Register", command=self.register, bg="#12DB81", fg="white", bd=0,
+                                relief=tk.GROOVE, padx=20, pady=10, borderwidth=2, highlightthickness=0, cursor="hand2",
+                                font=(default_font, 12))
+        register_button.pack(side=tk.LEFT, padx=(180, 5), pady=10)
 
-
-        # Create a register button
-        register_button = tk.Button(registration_frame, text="Register", command=self.register,  bg="green", fg="white")
-        register_button.pack(pady=10)
-
-        back_button = tk.Button(registration_frame, text="Back", command=self.back, bg="grey", fg="white")  # Green button with white text
-        back_button.pack(pady=5)
+        # Create a back button
+        back_button = tk.Button(registration_frame, text="Back", command=self.back, bg="#63E8A6", fg="white", bd=0,
+                                relief=tk.GROOVE, padx=20, pady=10, borderwidth=2, highlightthickness=0, cursor="hand2",
+                                font=(default_font, 12))
+        back_button.pack(side=tk.LEFT, padx=(5, 10), pady=10)
 
         # Connect to Database
         self.db_connection = create_db_connection()
@@ -264,7 +233,7 @@ class FarmerLoginRegistrationScreen:
     def open_dashboard(self):
         self.root.withdraw()  # Hide the login/registration screen
         farmer_window = tk.Toplevel()  # Create a new window
-        farmer_app = FarmerDashboardScreen(farmer_window)
+        farmer_app = FarmerDashboardScreen(farmer_window, self.db_connection)
         self.close()
 
     def close(self):

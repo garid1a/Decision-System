@@ -2,39 +2,49 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 from app.views.layout import Layout 
+from tkinter import font
 
 class LandingPage:
     def __init__(self, root):
+        
         self.root = root
         self.root.title("Landing Page")
-        self.root.geometry("800x400")  # Set the window size
-        self.root.configure(bg="white") 
+        self.root.geometry("1200x600")  # Set the window size
+        self.root.configure(bg="white")  
 
-        # Load the background image
-        # image = Image.open("C:/BIS608/FarmChoice/Decision-System/app/static/background.jpg")  # Replace with the actual path to your image
-        # photo = ImageTk.PhotoImage(image)
-        # background_label = tk.Label(root, image=photo)
-        # background_label.place(relwidth=1, relheight=1)
-
+        default_font = font.nametofont("TkDefaultFont")
+        default_font.configure(family="Roboto")
         # Reuse the common header and footer
-        Layout(root) 
+        Layout(root)
+
+        landing_frame = tk.Frame(root)  # Add a border
+        landing_frame.pack(fill="both", expand=True, side="top")
+
+        background_color = "white"
+        landing_frame.configure(bg=background_color)
+
         # Create a label for the title
-        title_label = tk.Label(root, text="Consumer-Farmer Decision Support System", font=("Helvetica", 24, "bold"), bg="white")
+        title_label = tk.Label(landing_frame, text="Welcome to the Consumer-Farmer Decision Support System", font=(default_font, 20, "bold"), bg="white")
         title_label.pack(pady=20)
 
         # Create a label for user type selection
-        user_type_label = tk.Label(root, text="Select User Type:", font=("Helvetica", 14), bg="white")
+        user_type_label = tk.Label(landing_frame, text="Please choose your user type:", font=(default_font, 14), bg="white")
         user_type_label.pack()
 
         # Create radio buttons for user type selection
         user_type = tk.StringVar()
-        consumer_radio = tk.Radiobutton(root, text="Consumer", variable=user_type, value="Consumer", font=("Helvetica", 12), bg="white")
-        farmer_radio = tk.Radiobutton(root, text="Farmer", variable=user_type, value="Farmer", font=("Helvetica", 12), bg="white")
+        consumer_radio = tk.Radiobutton(landing_frame, text="I am a Consumer", variable=user_type, value="Consumer", font=(default_font, 12), bg="white")
+        farmer_radio = tk.Radiobutton(landing_frame, text="I am a Farmer", variable=user_type, value="Farmer", font=(default_font, 12), bg="white")
         consumer_radio.pack()
         farmer_radio.pack()
 
+        user_info_label = tk.Label(landing_frame, text='Click the "Proceed" button when you are ready.', font=(default_font, 10), bg="white")
+        user_info_label.pack(pady=10)
+
         # Create a Proceed button
-        proceed_button = tk.Button(root, text="Proceed", command=lambda: self.proceed(user_type.get()), font=("Helvetica", 14), bg="white", fg="black")
+        proceed_button = tk.Button(landing_frame, text="Proceed", command=lambda: self.proceed(user_type.get()), bg="#12DB81", fg="white",
+                                    bd=0, relief=tk.GROOVE, padx=20, pady=10, borderwidth=2, highlightthickness=0,
+                                    cursor="hand2", font=(default_font, 12))
         proceed_button.pack(pady=20)
 
     def proceed(self, user_type):

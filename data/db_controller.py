@@ -1,5 +1,7 @@
 import mysql.connector
- 
+import os
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib import colors
 # Insert a new Consumer into the database
 def insert_consumer(connection, consumer):
     """
@@ -254,12 +256,129 @@ def update_product(connection, product):
 
 def get_all_products(connection):
     try:
-        cursor = connection.cursor(dictionary=True)  # Use a dictionary cursor for easier data access
+        cursor = connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM Product")
         products = cursor.fetchall()
-        cursor.close()  # Close the cursor
 
+        for product in products:
+            # Process or print each product if needed
+            print(product)
+
+        cursor.close()
         return products
     except Exception as e:
         print(f"Error: {str(e)}")
+        return [{'ProductID':1, 'ProductName': "Rice"}, {'ProductID':2,'ProductName':"Wheat"}, {'ProductID':3,'ProductName':"Maize"}, {'ProductID':4,'ProductName':"Sugarcane"}, {'ProductID':5,'ProductName':"Cotton"}, {'ProductID':6,'ProductName':"Soybeans"}, {'ProductID':7,'ProductName':"Groundnuts"}, {'ProductID':8,'ProductName':"Tea"}, {'ProductID':9,'ProductName':"Jute"}, {'ProductID':10,'ProductName':"Rubber"}]
+
+def get_product_preferences_count(connection):
+    cursor = connection.cursor()
+
+    # Query to get the product names and their preference count
+    query = """
+        SELECT Product.ProductName, COUNT(ProductPreference.PreferenceID) as PreferenceCount
+        FROM Product
+        LEFT JOIN ProductPreference ON Product.ProductID = ProductPreference.ProductID
+        LEFT JOIN Preference ON ProductPreference.PreferenceID = Preference.PreferenceID
+        GROUP BY Product.ProductID
+    """
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        # Convert the result to a list of dictionaries for easy access
+        product_preferences = [{"ProductName": row[0], "PreferenceCount": row[1]} for row in result]
+        print(product_preferences)
+        return product_preferences
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
         return []
+    
+def get_top_product_preferences(connection, limit=5):
+    cursor = connection.cursor()
+
+    # Query to get the top 5 product names and their preference count
+    query = """
+        SELECT Product.ProductName, COUNT(ProductPreference.PreferenceID) as PreferenceCount
+        FROM Product
+        LEFT JOIN ProductPreference ON Product.ProductID = ProductPreference.ProductID
+        LEFT JOIN Preference ON ProductPreference.PreferenceID = Preference.PreferenceID
+        GROUP BY Product.ProductID
+        ORDER BY PreferenceCount DESC
+        LIMIT %s
+    """
+
+    try:
+        cursor.execute(query, (limit,))
+        result = cursor.fetchall()
+
+        # Convert the result to a list of dictionaries for easy access
+        product_preferences = [{"ProductName": row[0], "PreferenceCount": row[1]} for row in result]
+        print(product_preferences)
+        return product_preferences
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return []
+    
+
+def generate_product_preference_report(connection):
+    cursor = connection.cursor(dictionary=True)
+
+    # Query to get product preferences along with other details
+    query = """
+                SELECT 
+            Product.ProductName, 
+            COUNT(ProductPreference.PreferenceID) as PreferenceCount,
+            Consumer.Location,
+            Preference.Month,
+            Product.Season,
+            Product.SoilType
+        FROM Product
+        LEFT JOIN ProductPreference ON Product.ProductID = ProductPreference.ProductID
+        LEFT JOIN Preference ON ProductPreference.PreferenceID = Preference.PreferenceID
+        LEFT JOIN Consumer ON Preference.ConsumerID = Consumer.ConsumerID
+        GROUP BY Product.ProductID, Consumer.Location, Preference.Month, Product.Season, Product.SoilType;
+
+    """
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        print(result)
+        pdf_filename = "product_preference_report.pdf" 
+        document = SimpleDocTemplate(pdf_filename)
+
+        # Extracting data for the table
+        data = [['Product', 'Preference Count', 'Location', 'Month', 'Soil Type', 'Season']]
+        for entry in result:
+            data.append([
+                entry['ProductName'],
+                str(entry['PreferenceCount']),
+                entry['Location'],
+                entry['Month'],
+                entry['SoilType'],
+                entry['Season']
+            ])
+
+        # Creating the table
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        # Build the PDF document
+        document.build([table])
+
+        print(f"Report generated and saved as {pdf_filename}")
+
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
