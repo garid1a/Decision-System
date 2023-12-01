@@ -1,7 +1,10 @@
 import mysql.connector
 import os
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+import ast
+
 # Insert a new Consumer into the database
 def insert_consumer(connection, consumer):
     """
@@ -321,6 +324,37 @@ def get_top_product_preferences(connection, limit=5):
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return []
+
+def get_preference_count_by_month(connection):
+    cursor = connection.cursor(dictionary=True)
+
+    # Query to get the preference count for each month
+    query = """
+        SELECT 
+            Preference.Month,
+            COUNT(ProductPreference.PreferenceID) as PreferenceCount
+        FROM 
+            Preference
+        LEFT JOIN 
+            ProductPreference ON Preference.PreferenceID = ProductPreference.PreferenceID
+        GROUP BY 
+            Preference.Month
+        ORDER BY 
+            PreferenceCount DESC
+    """
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        # Convert the result to a list of dictionaries for easy access
+        monthly_preference_count = [{"Month": ast.literal_eval(row['Month'])[0], "PreferenceCount": row['PreferenceCount']} for row in result]
+        print(monthly_preference_count)
+        return monthly_preference_count
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return []
     
 
 def generate_product_preference_report(connection):
@@ -347,9 +381,12 @@ def generate_product_preference_report(connection):
         cursor.execute(query)
         result = cursor.fetchall()
         print(result)
-        pdf_filename = "product_preference_report.pdf" 
+        pdf_filename = "consumer_report.pdf" 
         document = SimpleDocTemplate(pdf_filename)
 
+        # Creating the title
+        title = Paragraph("Consumer Preference Report", getSampleStyleSheet()['Title'])
+        
         # Extracting data for the table
         data = [['Product', 'Preference Count', 'Location', 'Month', 'Soil Type', 'Season']]
         for entry in result:
@@ -375,10 +412,239 @@ def generate_product_preference_report(connection):
         ]))
 
         # Build the PDF document
-        document.build([table])
+        document.build([title, table])
+
+        print(f"Report generated and saved as {pdf_filename}")
+        
+
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+def generate_product_report(connection):
+    cursor = connection.cursor(dictionary=True)
+
+    # Query to get product preferences along with other details
+    query = """
+                SELECT 
+                    Product.ProductName, 
+                    COUNT(ProductPreference.PreferenceID) as PreferenceCount
+                FROM Product
+                LEFT JOIN ProductPreference ON Product.ProductID = ProductPreference.ProductID
+                GROUP BY Product.ProductID;
+            """
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        print(result)
+        pdf_filename = "product_report.pdf" 
+        document = SimpleDocTemplate(pdf_filename)
+
+        # Extracting data for the table
+        data = [['Product', 'Preference Count']]
+        for entry in result:
+            data.append([
+                entry['ProductName'],
+                str(entry['PreferenceCount']),
+            ])
+
+        # Creating the title
+        title = Paragraph("Product Report", getSampleStyleSheet()['Title'])
+
+        # Creating the table
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        # Build the PDF document
+        document.build([title, table])
+
+        print(f"Product report generated and saved as {pdf_filename}")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+def generate_product_preference_report_by_location(connection):
+    cursor = connection.cursor(dictionary=True)
+
+    # Query to get product preferences along with other details
+    query = """
+        SELECT 
+            Product.ProductName, 
+            COUNT(ProductPreference.PreferenceID) as PreferenceCount,
+            Consumer.Location,
+            Preference.Month
+        FROM Product
+        LEFT JOIN ProductPreference ON Product.ProductID = ProductPreference.ProductID
+        LEFT JOIN Preference ON ProductPreference.PreferenceID = Preference.PreferenceID
+        LEFT JOIN Consumer ON Preference.ConsumerID = Consumer.ConsumerID
+        GROUP BY Product.ProductID, Consumer.Location, Preference.Month;
+    """
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        pdf_filename = "Location_preference_report.pdf" 
+        document = SimpleDocTemplate(pdf_filename)
+
+        # Creating the title
+        title = Paragraph("Product Preference Report for Farmers - Location", getSampleStyleSheet()['Title'])
+        
+        # Extracting data for the table
+        data = [['Product', 'Preference Count', 'Location', 'Month']]
+        current_location = None  # To track the current location while iterating through result
+        for entry in result:
+            if entry['Location'] != current_location:
+                data.append(['', '', entry['Location'], ''])  # Add a row for the location
+                current_location = entry['Location']
+            data.append([
+                entry['ProductName'],
+                str(entry['PreferenceCount']),
+                '',
+                entry['Month']
+            ])
+
+        # Creating the table
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        # Build the PDF document
+        document.build([title, table])
 
         print(f"Report generated and saved as {pdf_filename}")
 
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+def generate_product_preference_report_by_product(connection):
+    cursor = connection.cursor(dictionary=True)
+
+    # Query to get product preferences along with other details
+    query = """
+        SELECT 
+            Product.ProductName, 
+            Preference.Month,
+            COUNT(ProductPreference.PreferenceID) as PreferenceCount
+        FROM Product
+        LEFT JOIN ProductPreference ON Product.ProductID = ProductPreference.ProductID
+        LEFT JOIN Preference ON ProductPreference.PreferenceID = Preference.PreferenceID
+        GROUP BY Product.ProductID, Preference.Month;
+    """
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        pdf_filename = "product_preference_report_by_product.pdf" 
+        document = SimpleDocTemplate(pdf_filename)
+
+        # Creating the title
+        title = Paragraph("Product Preference Report for Farmers - Crop", getSampleStyleSheet()['Title'])
+        
+        # Extracting data for the table
+        data = [['Product', 'Month', 'Preference Count']]
+        current_product = None  # To track the current product while iterating through result
+        for entry in result:
+            if entry['ProductName'] != current_product:
+                data.append([entry['ProductName'], '', ''])  # Add a row for the product
+                current_product = entry['ProductName']
+            data.append([
+                '',
+                entry['Month'],
+                str(entry['PreferenceCount'])
+            ])
+
+        # Creating the table
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        # Build the PDF document
+        document.build([title, table])
+
+        print(f"Report generated and saved as {pdf_filename}")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+def generate_product_preference_report_by_month(connection):
+    cursor = connection.cursor(dictionary=True)
+
+        # Query to get product preferences along with other details
+    query = """
+            SELECT 
+                Product.ProductName, 
+                COUNT(ProductPreference.PreferenceID) as PreferenceCount,
+                Preference.Month
+            FROM Product
+            LEFT JOIN ProductPreference ON Product.ProductID = ProductPreference.ProductID
+            LEFT JOIN Preference ON ProductPreference.PreferenceID = Preference.PreferenceID
+            GROUP BY Product.ProductID, Preference.Month;
+        """
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        pdf_filename = "Monthly_product_preference_report.pdf" 
+        document = SimpleDocTemplate(pdf_filename)
+
+        # Creating the title
+        title = Paragraph("Product Preference Report for Farmers - Monthly", getSampleStyleSheet()['Title'])
+        
+        # Extracting data for the table
+        data = [['Product', 'Preference Count']]
+
+        # Creating a dictionary to store preference count for each month
+        month_preference_count = {}
+
+        for entry in result:
+            month = entry['Month']
+            if month not in month_preference_count:
+                month_preference_count[month] = []
+            month_preference_count[month].append([entry['ProductName'], str(entry['PreferenceCount'])])
+
+        # Adding the data to the table
+        for month, preferences in month_preference_count.items():
+            data.append([month, ''])  # Add a row for the month
+            data.extend(preferences)
+
+        # Creating the table
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        # Build the PDF document
+        document.build([title, table])
+
+        print(f"Report generated and saved as {pdf_filename}")
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")

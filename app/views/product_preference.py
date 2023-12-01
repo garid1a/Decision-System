@@ -1,17 +1,18 @@
 import tkinter as tk
-
+from PIL import Image, ImageTk
 from tkinter import messagebox
 from app.views.thankyou import ThankYouScreen
 from data.db_controller import get_all_products
 from data.db_controller import insert_preference
 from tkinter import font 
+from data.db_connection import create_db_connection
 class ProductPreferenceScreen:
     def __init__(self, root, connection, consumerID):
         
         self.root = root
         self.connection = connection
         self.consumerID = consumerID
-        self.root.title("Product Preference")
+        self.root.title("Crop/Product Preference")
         self.root.geometry("1200x600")  # Set the window to full screen
  
 
@@ -19,8 +20,8 @@ class ProductPreferenceScreen:
         default_font.configure(family="Roboto")
 
         self.root.configure(bg="white")
-        title_label = tk.Label(root, text="Product Preference", font=(default_font, 16), bg="white")
-        title_label.grid(row=0, column=2, pady=10)
+        title_label = tk.Label(root, text="Product/Crop Preferences", font=(default_font, 16), bg="white")
+        title_label.grid(row=0, column=1, pady=10)
 
         # Fetch products from the database
         self.products = get_all_products(self.connection)
@@ -51,7 +52,7 @@ class ProductPreferenceScreen:
         product_frame.grid(row=0, column=1, padx=10)
 
         # Create a label for product selection
-        product_label = tk.Label(product_frame, text="Select Products:", bg="white")
+        product_label = tk.Label(product_frame, text="Select Crop/Products:", bg="white")
         product_label.pack()
 
         # Create variables to store the state of the checkboxes
@@ -73,19 +74,37 @@ class ProductPreferenceScreen:
         submit_button.pack(pady=10)
 
         # Create a listbox to display selected preferences at the bottom
-        self.preference_listbox = tk.Listbox(root, selectbackground="#12DB81", selectforeground="white", bg="white", width=60)
-        self.preference_listbox.grid(row=1, column=5, pady=10)
+        self.preference_listbox = tk.Listbox(root, selectbackground="#12DB81", selectforeground="white", bg="white", width=80)
+        self.preference_listbox.grid(row=2, column=1, pady=10)
 
         # Create a frame for the "Add Preferences" button
         submit_button_frame = tk.Frame(root, bg="white")
-        submit_button_frame.grid(row=2, column=5, padx=10)
+        submit_button_frame.grid(row=3, column=1, padx=10)
 
         # Set the button color to green
         final_button = tk.Button(submit_button_frame, text="Finish", command=self.submit_preferences, bg="#12DB81", fg="white",
                                  bd=0, relief=tk.GROOVE, padx=20, pady=10, borderwidth=2, highlightthickness=0,
                                  cursor="hand2", font=(default_font, 12))
         final_button.pack(pady=10) 
+
+        image_frame = tk.Frame(root, bg="#12DB81")
+        image_frame.grid(row=0, column=0, rowspan=4, padx=10)
+        # Add image to header using PIL
+        image_path = "C:/BIS608/FarmChoice/Decision-System/app/static/preference.jpg"  # Replace with your image path
+        original_image = Image.open(image_path) 
+
+        # Resize the image to the desired dimensions
+        resized_image = original_image.resize((600, 400))
+        photo = ImageTk.PhotoImage(resized_image)
+
+        image_label = tk.Label(image_frame, image=photo, bg="#12DB81")
+        image_label.image = photo
+        image_label.pack()
         
+        self.db_connection = create_db_connection()
+
+        if self.db_connection:
+            print("Connected to the database")
 
     def add_preferences(self):
         selected_products = [product['ProductName'] for product, var in zip(self.products, self.product_vars) if var.get()]
@@ -95,7 +114,7 @@ class ProductPreferenceScreen:
             messagebox.showerror("Error", "Please select at least one product.")
             return
         try:
-            self.preferences = insert_preference(self.connection, selected_month_year, self.consumerID, self.products, selected_products)
+            self.preferences = insert_preference(self.db_connection, selected_month_year, self.consumerID, self.products, selected_products)
         except:
             messagebox.showerror("Error", "Error Occured")
 
@@ -107,7 +126,7 @@ class ProductPreferenceScreen:
         messagebox.showinfo("Success", f"Preferences added for {selected_month_year}.")
 
         # You can add more logic to update the display or reset selections if needed
-
+        
     def submit_preferences(self):
         self.thankyou()
       
